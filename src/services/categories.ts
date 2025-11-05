@@ -1,12 +1,19 @@
 import { api } from './api';
 import { ApiResponse, Category, CategoriesResponse, CategoryFormData } from '../types/api';
 import { withFallback, fallbackService } from './fallbackData';
+import { safeApiCall, createFallbackData } from '../utils/errorPrevention';
 
 export const categoriesService = {
   // Public endpoints
   getCategories: async (): Promise<ApiResponse<CategoriesResponse>> => {
-    const response = await api.get<ApiResponse<CategoriesResponse>>('/categories');
-    return response.data;
+    return safeApiCall(
+      async () => {
+        const response = await api.get<ApiResponse<CategoriesResponse>>('/categories');
+        return response.data;
+      },
+      createFallbackData.categories(),
+      'getCategories'
+    );
   },
 
   getCategoryBySlug: async (slug: string): Promise<ApiResponse<{ category: Category }>> => {
@@ -29,11 +36,7 @@ export const categoriesService = {
   getAdminCategories: async (): Promise<ApiResponse<Category[]>> => {
     return withFallback(
       async () => {
-<<<<<<< HEAD
-        const response = await api.get<ApiResponse<Category[]>>('/categories');
-=======
         const response = await api.get<ApiResponse<Category[]>>('/admin/categories');
->>>>>>> 7c457f5fd32731065b3f73f365f8476085debfc4
         return response.data;
       },
       () => fallbackService.getAdminCategories()

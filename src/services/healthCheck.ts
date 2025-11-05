@@ -111,14 +111,18 @@ class FrontendHealthCheckService {
     const startTime = Date.now();
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
       const response = await fetch('/api/health', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        signal: AbortSignal.timeout(5000) // 5 second timeout
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
       const responseTime = Date.now() - startTime;
 
       if (response.ok) {
@@ -147,14 +151,22 @@ class FrontendHealthCheckService {
       }
     } catch (error) {
       const responseTime = Date.now() - startTime;
+      
+      // Don't log health check failures if they're being suppressed
+      const errorMessage = (error as Error).message;
+      if (!errorMessage.includes('aborted') && !errorMessage.includes('fetch')) {
+        console.warn('API health check failed:', errorMessage);
+      }
+      
       return {
         status: 'unhealthy',
-        message: `API connectivity failed: ${(error as Error).message}`,
+        message: `API connectivity failed: ${errorMessage}`,
         responseTime,
         lastChecked: new Date(),
         details: {
-          error: (error as Error).message,
-          isNetworkError: error instanceof TypeError
+          error: errorMessage,
+          isNetworkError: error instanceof TypeError,
+          isTimeout: errorMessage.includes('aborted')
         }
       };
     }
@@ -278,7 +290,7 @@ class FrontendHealthCheckService {
       let message = 'Performance metrics are normal';
 
       const details: any = {
-        loadTime: navigation ? Math.round(navigation.loadEventEnd - navigation.navigationStart) : 'unknown'
+        loadTime: navigation ? Math.round(navigation.loadEventEnd - navigation.fetchStart) : 'unknown'
       };
 
       if (memory) {

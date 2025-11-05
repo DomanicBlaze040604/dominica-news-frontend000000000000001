@@ -1,6 +1,7 @@
 import { api } from './api';
 import { ApiResponse, Article, ArticlesResponse, ArticleFormData } from '../types/api';
 import { withFallback, fallbackService } from './fallbackData';
+import { safeApiCall, createFallbackData } from '../utils/errorPrevention';
 
 export const articlesService = {
   // Public endpoints
@@ -9,15 +10,21 @@ export const articlesService = {
     limit?: number;
     category?: string;
   }): Promise<ApiResponse<ArticlesResponse>> => {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.append('page', params.page.toString());
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    if (params?.category) searchParams.append('category', params.category);
+    return safeApiCall(
+      async () => {
+        const searchParams = new URLSearchParams();
+        if (params?.page) searchParams.append('page', params.page.toString());
+        if (params?.limit) searchParams.append('limit', params.limit.toString());
+        if (params?.category) searchParams.append('category', params.category);
 
-    const response = await api.get<ApiResponse<ArticlesResponse>>(
-      `/articles?${searchParams.toString()}`
+        const response = await api.get<ApiResponse<ArticlesResponse>>(
+          `/articles?${searchParams.toString()}`
+        );
+        return response.data;
+      },
+      createFallbackData.articles(),
+      'getPublishedArticles'
     );
-    return response.data;
   },
 
   getArticleBySlug: async (slug: string): Promise<ApiResponse<{ article: Article }>> => {
@@ -89,11 +96,7 @@ export const articlesService = {
         if (params?.category) searchParams.append('category', params.category);
 
         const response = await api.get<ApiResponse<ArticlesResponse>>(
-<<<<<<< HEAD
-          `/articles?${searchParams.toString()}`
-=======
           `/admin/articles?${searchParams.toString()}`
->>>>>>> 7c457f5fd32731065b3f73f365f8476085debfc4
         );
         return response.data;
       },

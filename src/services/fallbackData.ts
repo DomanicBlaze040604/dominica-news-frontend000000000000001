@@ -3,7 +3,7 @@
  * This provides mock data to keep the frontend functional during development
  */
 
-import { ApiResponse, Article, Category, Author, Image, BreakingNews } from '../types/api';
+import { ApiResponse, Article, Category, Author, Image, BreakingNews, StaticPage } from '../types/api';
 
 // Mock data
 const mockCategories: Category[] = [
@@ -195,11 +195,11 @@ export const fallbackService = {
     });
   },
 
-  getAdminAuthors: (): Promise<ApiResponse<{ authors: Author[] }>> => {
+  getAdminAuthors: (): Promise<ApiResponse<{ authors: Author[]; count: number }>> => {
     return Promise.resolve({
       success: true,
       message: 'Admin authors retrieved (fallback data)',
-      data: { authors: mockAuthors },
+      data: { authors: mockAuthors, count: mockAuthors.length },
     });
   },
 
@@ -269,7 +269,7 @@ export const fallbackService = {
   },
 
   // Static Pages
-  getStaticPages: (published?: boolean): Promise<ApiResponse<{ data: any[]; count: number }>> => {
+  getStaticPages: (published?: boolean): Promise<ApiResponse<{ data: StaticPage[]; count: number }>> => {
     const filteredPages = published ? mockStaticPages.filter(p => p.isPublished) : mockStaticPages;
     return Promise.resolve({
       success: true,
@@ -290,13 +290,8 @@ export const fallbackService = {
 
 // Helper function to check if we should use fallback data
 export const shouldUseFallback = (error: any): boolean => {
-<<<<<<< HEAD
-  // Use fallback for 404 errors on API endpoints
-  if (error?.response?.status === 404) {
-=======
   // Use fallback for 404 errors on admin endpoints
   if (error?.response?.status === 404 && error?.config?.url?.includes('/admin/')) {
->>>>>>> 7c457f5fd32731065b3f73f365f8476085debfc4
     return true;
   }
   

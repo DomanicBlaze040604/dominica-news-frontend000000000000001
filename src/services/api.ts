@@ -51,29 +51,12 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
-// Token refresh flag to prevent multiple refresh attempts
-let isRefreshing = false;
-let failedQueue: Array<{ resolve: (value?: any) => void; reject: (reason?: any) => void }> = [];
-
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error);
-    } else {
-      resolve(token);
-    }
-  });
-  
-  failedQueue = [];
-};
+// Note: Token refresh functionality removed to simplify error handling
+// and prevent cascading authentication errors when backend is down
 
 // Request interceptor to add auth token and metadata
 apiClient.interceptors.request.use(
-<<<<<<< HEAD
-  async (config) => {
-=======
   (config) => {
->>>>>>> 7c457f5fd32731065b3f73f365f8476085debfc4
     const endpoint = config.url || '';
     
     // Check rate limiting
@@ -81,53 +64,6 @@ apiClient.interceptors.request.use(
       const error = new Error('Rate limit exceeded. Please slow down your requests.');
       (error as any).isRateLimit = true;
       return Promise.reject(error);
-<<<<<<< HEAD
-    }
-    
-    // Add to request queue
-    addToRequestQueue(endpoint);
-    
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      // Check if token is expired before making request
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const currentTime = Date.now() / 1000;
-        
-        // If token expires in less than 5 minutes, try to refresh it
-        if (payload.exp && payload.exp - currentTime < 300) {
-          if (!isRefreshing && !endpoint.includes('/auth/refresh')) {
-            try {
-              const refreshResponse = await fetch(`${config.apiBaseUrl}/auth/refresh`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-              });
-              
-              if (refreshResponse.ok) {
-                const data = await refreshResponse.json();
-                localStorage.setItem('auth_token', data.data.token);
-                config.headers.Authorization = `Bearer ${data.data.token}`;
-              }
-            } catch (error) {
-              // If refresh fails, continue with existing token
-              config.headers.Authorization = `Bearer ${token}`;
-            }
-          } else {
-            config.headers.Authorization = `Bearer ${token}`;
-          }
-        } else {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-      } catch (error) {
-        // If token parsing fails, use it as is
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-    
-=======
     }
     
     // Add to request queue
@@ -138,7 +74,6 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
->>>>>>> 7c457f5fd32731065b3f73f365f8476085debfc4
     // Add request metadata
     (config as AxiosRequestConfig & { metadata?: { startTime: Date; endpoint: string } }).metadata = { 
       startTime: new Date(),
@@ -146,11 +81,11 @@ apiClient.interceptors.request.use(
     };
     
     // Add request ID for tracking
-    config.headers['X-Request-ID'] = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    config.headers['X-Request-ID'] = `req_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     
     return config;
   },
-  (error) => {
+  (error: any) => {
     if (config.logging.enableConsole && shouldLog('error')) {
       console.error('Request interceptor error:', error);
     }
@@ -199,91 +134,14 @@ apiClient.interceptors.response.use(
       }
     }
 
-<<<<<<< HEAD
-    // Handle 401 errors with token refresh attempt
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        // If already refreshing, queue this request
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        }).then(token => {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return apiClient(originalRequest);
-        }).catch(err => {
-          return Promise.reject(err);
-        });
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        // Attempt to refresh token
-        const refreshResponse = await fetch(`${config.apiBaseUrl}/auth/refresh`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (refreshResponse.ok) {
-          const data = await refreshResponse.json();
-          const newToken = data.data.token;
-          
-          localStorage.setItem('auth_token', newToken);
-          processQueue(null, newToken);
-          
-          // Retry original request with new token
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
-          return apiClient(originalRequest);
-        } else {
-          throw new Error('Token refresh failed');
-        }
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        
-        // Clear tokens and redirect to login
+    // Handle 401 errors by clearing token and redirecting to login
+    if (error.response?.status === 401) {
+      // Prevent multiple auth error toasts
+      if (!window.location.pathname.includes('/auth')) {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user_data');
         toast.error('Session expired. Please log in again.');
         
-        // Only redirect if not already on auth page
-        if (!window.location.pathname.includes('/auth')) {
-          setTimeout(() => {
-            window.location.href = '/auth';
-          }, 1500);
-        }
-        
-        return Promise.reject(error);
-      } finally {
-        isRefreshing = false;
-      }
-    }
-
-    // Handle 403 errors (forbidden)
-    if (error.response?.status === 403) {
-      toast.error('Access denied. You do not have permission to perform this action.');
-      return Promise.reject(error);
-    }
-
-    // Handle 404 errors
-    if (error.response?.status === 404) {
-      const endpoint = originalRequest?.metadata?.endpoint || originalRequest?.url || '';
-      // Check if it's an API endpoint that might have fallback data
-      const apiEndpoints = ['/articles', '/categories', '/authors', '/images', '/breaking-news', '/static-pages'];
-      if (apiEndpoints.some(apiEndpoint => endpoint.includes(apiEndpoint))) {
-        console.warn(`API endpoint not found: ${endpoint}. Using fallback data if available.`);
-        // Don't show toast for API 404s as fallback data will be used
-=======
-    // Handle 401 errors by clearing token and redirecting to login
-    if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user_data');
-      toast.error('Session expired. Please log in again.');
-      
-      // Only redirect if not already on auth page
-      if (!window.location.pathname.includes('/auth')) {
         setTimeout(() => {
           window.location.href = '/auth';
         }, 1500);
@@ -292,19 +150,22 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Handle 403 errors (forbidden)
+    // Handle 403 errors (forbidden) - only show toast for admin actions
     if (error.response?.status === 403) {
-      toast.error('Access denied. You do not have permission to perform this action.');
+      const endpoint = originalRequest?.metadata?.endpoint || originalRequest?.url || '';
+      if (endpoint.includes('/admin/')) {
+        toast.error('Access denied. You do not have permission to perform this action.');
+      }
       return Promise.reject(error);
     }
 
-    // Handle 404 errors
+    // Handle 404 errors - be more selective about showing toasts
     if (error.response?.status === 404) {
       const endpoint = originalRequest?.metadata?.endpoint || originalRequest?.url || '';
-      if (endpoint.includes('/admin/')) {
+      // Only show toast for user-initiated actions, not background API calls
+      if (endpoint.includes('/admin/') && !endpoint.includes('/articles') && !endpoint.includes('/categories')) {
         console.warn(`Admin endpoint not found: ${endpoint}. Using fallback data if available.`);
         // Don't show toast for admin 404s as fallback data will be used
->>>>>>> 7c457f5fd32731065b3f73f365f8476085debfc4
       } else {
         toast.error('Resource not found.');
       }
@@ -337,17 +198,12 @@ apiClient.interceptors.response.use(
       if (config.logging.enableConsole) {
         console.log(`Retrying request (${retryCount}/${maxRetries}) after ${Math.round(delay)}ms...`);
       }
-<<<<<<< HEAD
       
-      // Show user-friendly retry message
-      const endpoint = originalRequest?.metadata?.endpoint || originalRequest?.url || 'API';
-      toast.info(`Connection lost. Retrying ${endpoint}... (${retryCount}/${maxRetries})`, {
-        duration: delay,
-        description: 'Please check your internet connection'
-      });
-=======
-      toast.info(`Connection failed. Retrying... (${retryCount}/${maxRetries})`);
->>>>>>> 7c457f5fd32731065b3f73f365f8476085debfc4
+      // Only show retry toast for user-initiated actions, not background requests
+      const endpoint = originalRequest?.metadata?.endpoint || originalRequest?.url || '';
+      if (!endpoint.includes('/health') && !endpoint.includes('/status')) {
+        toast.info(`Connection failed. Retrying... (${retryCount}/${maxRetries})`);
+      }
       
       await new Promise(resolve => setTimeout(resolve, delay));
       
@@ -365,17 +221,12 @@ apiClient.interceptors.response.use(
       if (config.logging.enableConsole) {
         console.log(`Server error, retrying (${retryCount}/${maxRetries}) after ${delay}ms...`);
       }
-<<<<<<< HEAD
       
-      // Show user-friendly server error message
-      const endpoint = originalRequest?.metadata?.endpoint || originalRequest?.url || 'API';
-      toast.error(`Server temporarily unavailable. Retrying ${endpoint}... (${retryCount}/${maxRetries})`, {
-        duration: delay,
-        description: 'Our servers are experiencing issues. Please wait...'
-      });
-=======
-      toast.error(`Server error. Retrying... (${retryCount}/${maxRetries})`);
->>>>>>> 7c457f5fd32731065b3f73f365f8476085debfc4
+      // Only show server error toast for user-initiated actions
+      const endpoint = originalRequest?.metadata?.endpoint || originalRequest?.url || '';
+      if (!endpoint.includes('/health') && !endpoint.includes('/status')) {
+        toast.error(`Server error. Retrying... (${retryCount}/${maxRetries})`);
+      }
       
       await new Promise(resolve => setTimeout(resolve, delay));
       return apiClient(originalRequest);
@@ -384,44 +235,25 @@ apiClient.interceptors.response.use(
     // Reset retry count for non-retryable errors
     retryCount = 0;
     
-<<<<<<< HEAD
-    // Handle specific error messages with better user experience
-    if (!error.response) {
-      (error as any).message = 'Network error. Please check your internet connection.';
-      toast.error('Connection failed', {
-        description: 'Please check your internet connection and try again.',
-        action: {
-          label: 'Retry',
-          onClick: () => window.location.reload()
-        }
-      });
-    } else if (error.response.status >= 500) {
-      toast.error('Server temporarily unavailable', {
-        description: 'Our servers are experiencing issues. Please try again in a few minutes.',
-        action: {
-          label: 'Retry',
-          onClick: () => window.location.reload()
-        }
-      });
-    } else if (error.response.status >= 400 && error.response.status < 500) {
-      const errorMessage = error.response.data?.error || error.response.data?.message || 'Request failed';
-      if (!errorMessage.includes('Session expired') && !errorMessage.includes('Access denied')) {
-        toast.error('Request failed', {
-          description: errorMessage,
-          duration: 5000
-        });
-=======
-    // Handle specific error messages
-    if (!error.response) {
+    // Handle specific error messages - be more selective about showing toasts
+    const endpoint = originalRequest?.metadata?.endpoint || originalRequest?.url || '';
+    const isBackgroundRequest = endpoint.includes('/health') || endpoint.includes('/status') || endpoint.includes('/heartbeat');
+    
+    if (!error.response && !isBackgroundRequest) {
       (error as any).message = 'Network error. Please check your internet connection.';
       toast.error('Network error. Please check your internet connection.');
-    } else if (error.response.status >= 500) {
-      toast.error('Server error. Please try again later.');
-    } else if (error.response.status >= 400 && error.response.status < 500) {
-      const errorMessage = error.response.data?.error || error.response.data?.message || 'Request failed';
-      if (!errorMessage.includes('Session expired') && !errorMessage.includes('Access denied')) {
+    } else if (error.response?.status >= 500 && !isBackgroundRequest) {
+      // Only show server error toast once per minute to prevent spam
+      const lastServerErrorToast = localStorage.getItem('lastServerErrorToast');
+      const now = Date.now();
+      if (!lastServerErrorToast || now - parseInt(lastServerErrorToast) > 60000) {
+        localStorage.setItem('lastServerErrorToast', now.toString());
+        toast.error('Server error. Please try again later.');
+      }
+    } else if (error.response?.status >= 400 && error.response.status < 500 && !isBackgroundRequest) {
+      const errorMessage = (error as any).response?.data?.error || (error as any).response?.data?.message || 'Request failed';
+      if (!errorMessage.includes('Session expired') && !errorMessage.includes('Access denied') && !errorMessage.includes('Not found')) {
         toast.error(errorMessage);
->>>>>>> 7c457f5fd32731065b3f73f365f8476085debfc4
       }
     }
     

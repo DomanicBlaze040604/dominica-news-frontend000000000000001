@@ -33,7 +33,7 @@ export interface AuthorFormData {
 export const authorsService = {
   // Get all active authors (public)
   getAuthors: async (): Promise<ApiResponse<AuthorsResponse>> => {
-    const response = await api.get('/authors');
+    const response = await api.get<ApiResponse<AuthorsResponse>>('/authors');
     return response.data;
   },
 
@@ -41,56 +41,52 @@ export const authorsService = {
   getAdminAuthors: async (): Promise<ApiResponse<AuthorsResponse>> => {
     return withFallback(
       async () => {
-<<<<<<< HEAD
-        const response = await api.get('/authors');
-=======
-        const response = await api.get('/admin/authors');
->>>>>>> 7c457f5fd32731065b3f73f365f8476085debfc4
+        const response = await api.get<ApiResponse<AuthorsResponse>>('/admin/authors');
         return response.data;
       },
-      () => fallbackService.getAdminAuthors()
+      () => fallbackService.getAdminAuthors() as Promise<ApiResponse<AuthorsResponse>>
     );
   },
 
   // Get author by ID
   getAuthorById: async (id: string): Promise<ApiResponse<{ author: Author }>> => {
-    const response = await api.get(`/authors/${id}`);
+    const response = await api.get<ApiResponse<{ author: Author }>>(`/authors/${id}`);
     return response.data;
   },
 
   // Get author by slug
   getAuthorBySlug: async (slug: string): Promise<ApiResponse<{ author: Author; articles: any[]; pagination: any }>> => {
-    const response = await api.get(`/authors/slug/${slug}`);
+    const response = await api.get<ApiResponse<{ author: Author; articles: any[]; pagination: any }>>(`/authors/slug/${slug}`);
     return response.data;
   },
 
   // Get author statistics
   getAuthorStats: async (id: string): Promise<ApiResponse<any>> => {
-    const response = await api.get(`/authors/${id}/stats`);
+    const response = await api.get<ApiResponse<any>>(`/authors/${id}/stats`);
     return response.data;
   },
 
   // Toggle author status
   toggleAuthorStatus: async (id: string): Promise<ApiResponse<{ author: Author }>> => {
-    const response = await api.patch(`/authors/${id}/toggle-status`);
+    const response = await api.patch<ApiResponse<{ author: Author }>>(`/authors/${id}/toggle-status`);
     return response.data;
   },
 
   // Create new author
   createAuthor: async (data: AuthorFormData): Promise<ApiResponse<{ author: Author }>> => {
-    const response = await api.post('/authors', data);
+    const response = await api.post<ApiResponse<{ author: Author }>>('/authors', data);
     return response.data;
   },
 
   // Update author
   updateAuthor: async (id: string, data: Partial<AuthorFormData>): Promise<ApiResponse<{ author: Author }>> => {
-    const response = await api.put(`/authors/${id}`, data);
+    const response = await api.put<ApiResponse<{ author: Author }>>(`/authors/${id}`, data);
     return response.data;
   },
 
   // Delete author
   deleteAuthor: async (id: string): Promise<ApiResponse<{ message: string }>> => {
-    const response = await api.delete(`/authors/${id}`);
+    const response = await api.delete<ApiResponse<{ message: string }>>(`/authors/${id}`);
     return response.data;
   },
 };

@@ -4,7 +4,6 @@ import { withFallback, fallbackService } from './fallbackData';
 
 export const imagesService = {
   // Admin endpoints
-<<<<<<< HEAD
   uploadImage: async (file: File | FormData): Promise<ApiResponse<{ image: Image }>> => {
     let formData: FormData;
     
@@ -14,11 +13,6 @@ export const imagesService = {
       formData = new FormData();
       formData.append('image', file);
     }
-=======
-  uploadImage: async (file: File): Promise<ApiResponse<{ image: Image }>> => {
-    const formData = new FormData();
-    formData.append('image', file);
->>>>>>> 7c457f5fd32731065b3f73f365f8476085debfc4
     
     const response = await api.post<ApiResponse<{ image: Image }>>(
       '/images/upload',
@@ -45,19 +39,13 @@ export const imagesService = {
         const searchParams = new URLSearchParams();
         if (params?.page) searchParams.append('page', params.page.toString());
         if (params?.limit) searchParams.append('limit', params.limit.toString());
-<<<<<<< HEAD
         if (params?.search) searchParams.append('search', params.search);
         if (params?.sortBy) searchParams.append('sortBy', params.sortBy);
         if (params?.sortOrder) searchParams.append('sortOrder', params.sortOrder);
         if (params?.filter) searchParams.append('filter', params.filter);
 
         const response = await api.get<ApiResponse<ImagesResponse>>(
-          `/images?${searchParams.toString()}`
-=======
-
-        const response = await api.get<ApiResponse<ImagesResponse>>(
           `/admin/images?${searchParams.toString()}`
->>>>>>> 7c457f5fd32731065b3f73f365f8476085debfc4
         );
         return response.data;
       },
