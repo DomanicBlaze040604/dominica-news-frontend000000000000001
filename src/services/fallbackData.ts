@@ -3,7 +3,8 @@
  * This provides mock data to keep the frontend functional during development
  */
 
-import { ApiResponse, Article, Category, Author, Image, BreakingNews, StaticPage } from '../types/api';
+import { ApiResponse, Article, Category, Author, Image, BreakingNews } from '../types/api';
+import { StaticPage } from './staticPages';
 
 // Mock data
 const mockCategories: Category[] = [
@@ -49,20 +50,26 @@ const mockAuthors: Author[] = [
   {
     id: '1',
     name: 'John Smith',
+    slug: 'john-smith',
     role: 'Senior Political Reporter',
     biography: 'John has been covering Dominican politics for over 10 years.',
     email: 'john.smith@dominicanews.com',
     isActive: true,
+    joinDate: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year ago
+    articlesCount: 25,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
   {
     id: '2',
     name: 'Maria Rodriguez',
+    slug: 'maria-rodriguez',
     role: 'Sports Correspondent',
     biography: 'Maria covers sports events across the Caribbean region.',
     email: 'maria.rodriguez@dominicanews.com',
     isActive: true,
+    joinDate: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(), // 200 days ago
+    articlesCount: 18,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -80,6 +87,7 @@ const mockArticles: Article[] = [
     status: 'published',
     publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
     isPinned: true,
+    tags: ['infrastructure', 'government', 'development', 'roads'],
     featuredImage: '/api/placeholder/800/400',
     createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
@@ -95,6 +103,7 @@ const mockArticles: Article[] = [
     status: 'published',
     publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 hours ago
     isPinned: false,
+    tags: ['cricket', 'sports', 'championship', 'caribbean'],
     featuredImage: '/api/placeholder/800/400',
     createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
@@ -105,11 +114,12 @@ const mockArticles: Article[] = [
     slug: 'hurricane-season-preparedness-essential-tips',
     excerpt: 'As hurricane season approaches, local authorities provide crucial safety guidelines and preparation tips for all residents.',
     content: '<p>With the Atlantic hurricane season officially underway, Dominican authorities are urging residents to prepare...</p><p>Key preparation steps include securing emergency supplies, creating evacuation plans, and staying informed about weather updates.</p>',
-    category: mockCategories[2], // Weather
+    category: mockCategories[2], // Economy
     author: mockAuthors[0],
     status: 'published',
     publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), // 12 hours ago
     isPinned: false,
+    tags: ['hurricane', 'safety', 'preparedness', 'weather'],
     featuredImage: '/api/placeholder/800/400',
     createdAt: new Date(Date.now() - 14 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
@@ -125,6 +135,7 @@ const mockArticles: Article[] = [
     status: 'draft',
     publishedAt: null,
     isPinned: false,
+    tags: ['tourism', 'economy', 'recovery', 'pandemic'],
     featuredImage: '/api/placeholder/800/400',
     createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
@@ -135,11 +146,12 @@ const mockArticles: Article[] = [
     slug: 'local-school-wins-national-science-competition',
     excerpt: 'Students from Roseau Primary School have achieved first place in the national science fair with their innovative environmental project.',
     content: '<p>In an impressive display of scientific innovation, students from Roseau Primary School have won the national science competition...</p><p>Their project focused on sustainable energy solutions and environmental conservation, earning praise from judges and educators alike.</p>',
-    category: mockCategories[1], // Local News
+    category: mockCategories[1], // Sports
     author: mockAuthors[0],
     status: 'published',
     publishedAt: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString(), // 18 hours ago
     isPinned: false,
+    tags: ['education', 'science', 'students', 'competition'],
     featuredImage: '/api/placeholder/800/400',
     createdAt: new Date(Date.now() - 20 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString(),
