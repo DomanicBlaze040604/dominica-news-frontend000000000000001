@@ -321,7 +321,7 @@ export const AdminCategories: React.FC = () => {
                         </TableCell>
                         <TableCell>
                           <div>
-                            <p className="font-medium">{category.name}</p>
+                            <p className="font-medium">{category?.name || 'Unnamed Category'}</p>
                             <p className="text-sm text-gray-500">/{category.slug}</p>
                           </div>
                         </TableCell>

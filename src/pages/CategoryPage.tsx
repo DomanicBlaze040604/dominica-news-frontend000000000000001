@@ -114,7 +114,7 @@ const CategoryPage = () => {
                   excerpt={article.excerpt || ''}
                   image={article.featuredImage || ''}
                   imageAlt={article.featuredImageAlt}
-                  category={article.category.name}
+                  category={article.category?.name || 'Uncategorized'}
                   date={article.publishedAt || article.createdAt}
                   slug={article.slug}
                   author={article.author}

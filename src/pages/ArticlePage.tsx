@@ -110,7 +110,7 @@ const ArticlePage = () => {
             to={`/category/${article.category.slug}`}
             className="hover:text-primary transition-colors"
           >
-            {article.category.name}
+            {article.category?.name || 'Uncategorized'}
           </Link>
           <ChevronRight className="h-4 w-4" />
           <span className="text-foreground font-medium truncate max-w-xs">
@@ -123,7 +123,7 @@ const ArticlePage = () => {
           <header className="mb-8 animate-fade-in">
             <div className="mb-4">
               <Badge className="mb-4">
-                {article.category.name}
+                {article.category?.name || 'Uncategorized'}
               </Badge>
             </div>
             
@@ -235,7 +235,7 @@ const ArticlePage = () => {
                     to={`/category/${article.category.slug}`}
                     className="text-primary hover:underline"
                   >
-                    {article.category.name}
+                    {article.category?.name || 'Uncategorized'}
                   </Link>
                 </p>
               </div>
@@ -260,7 +260,7 @@ const ArticlePage = () => {
         {relatedArticles.length > 0 && (
           <section className="max-w-6xl mx-auto animate-fade-in-up" style={{ animationDelay: "400ms" }}>
             <h2 className="text-2xl font-bold text-foreground mb-6 pb-2 border-b-2 border-primary inline-block">
-              More {article.category.name} News
+              More {article.category?.name || 'Related'} News
             </h2>
             
             {isLoadingRelated ? (
@@ -279,7 +279,7 @@ const ArticlePage = () => {
                     excerpt={relatedArticle.excerpt || ''}
                     image={relatedArticle.featuredImage || ''}
                     imageAlt={relatedArticle.featuredImageAlt}
-                    category={relatedArticle.category.name}
+                    category={relatedArticle.category?.name || 'Uncategorized'}
                     date={relatedArticle.publishedAt || relatedArticle.createdAt}
                     slug={relatedArticle.slug}
                     author={relatedArticle.author}

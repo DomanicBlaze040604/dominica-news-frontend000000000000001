@@ -155,7 +155,7 @@ export const AdminArticles: React.FC = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{article.category.name}</Badge>
+                        <Badge variant="outline">{article.category?.name || 'Uncategorized'}</Badge>
                       </TableCell>
                       <TableCell>{getStatusBadge(article.status)}</TableCell>
                       <TableCell>{article.author.fullName}</TableCell>

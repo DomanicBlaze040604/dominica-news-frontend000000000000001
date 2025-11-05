@@ -36,7 +36,7 @@ const Navbar = () => {
   // Create navigation items with Home + categories
   const navItems = [
     { label: "Home", path: "/" },
-    ...categories.map(category => ({
+    ...categories.filter(category => category?.name).map(category => ({
       label: category.name,
       path: `/category/${category.slug}`,
     })),

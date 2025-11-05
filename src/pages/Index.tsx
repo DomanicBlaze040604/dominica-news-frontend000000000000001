@@ -113,7 +113,7 @@ const Index = () => {
     ? latestArticles.filter(article => 
         article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         article.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.category.name.toLowerCase().includes(searchQuery.toLowerCase())
+        article.category?.name?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : latestArticles;
   return (
@@ -207,7 +207,7 @@ const Index = () => {
                   excerpt={article.excerpt || ''}
                   image={article.featuredImage || ''}
                   imageAlt={article.featuredImageAlt}
-                  category={article.category.name}
+                  category={article.category?.name || 'Uncategorized'}
                   date={article.publishedAt || article.createdAt}
                   slug={article.slug}
                   author={article.author}
@@ -379,7 +379,7 @@ const Index = () => {
                 asChild
               >
                 <Link to={`/category/${category.slug}`}>
-                  {category.name}
+                  {category?.name || 'Unknown Category'}
                 </Link>
               </Button>
             ))}

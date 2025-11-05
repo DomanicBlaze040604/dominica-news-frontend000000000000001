@@ -149,7 +149,7 @@ export class KeywordOptimizationService {
             loc.toLowerCase().includes(article.location!.toLowerCase())
           )
         : this.LOCATION_KEYWORDS.slice(0, 3),
-      category: [article.category.name, `${article.category.name} News`, `${article.category.name} Dominica`]
+      category: article.category?.name ? [article.category.name, `${article.category.name} News`, `${article.category.name} Dominica`] : ['General', 'General News', 'General Dominica']
     };
   }
 
@@ -252,18 +252,18 @@ export class KeywordOptimizationService {
     const strategy = this.generateKeywordStrategy(article, categorySlug);
     
     return {
-      title: this.optimizeTitle(article.title, article.category.name, article.isBreaking),
+      title: this.optimizeTitle(article.title, article.category?.name || 'General', article.isBreaking),
       description: this.optimizeDescription(
         article.excerpt || article.seo?.metaDescription || '',
-        article.category.name,
+        article.category?.name || 'General',
         strategy.primary
       ),
       keywords: this.generateOptimizedKeywords(article, categorySlug),
       headings: {
         h1: article.title,
         h2: [
-          `Latest ${article.category.name} News from Dominica`,
-          `${article.category.name} Updates and Analysis`
+          `Latest ${article.category?.name || 'General'} News from Dominica`,
+          `${article.category?.name || 'General'} Updates and Analysis`
         ],
         h3: [
           'Breaking News Coverage',

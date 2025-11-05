@@ -69,14 +69,14 @@ export class MetaTagsService {
       ? (article.featuredImage.startsWith('http') ? article.featuredImage : `${this.BASE_URL}${article.featuredImage}`)
       : this.DEFAULT_IMAGE;
 
-    const title = article.seo?.metaTitle || `${article.title} - ${article.category.name} | ${this.SITE_NAME}`;
+    const title = article.seo?.metaTitle || `${article.title} - ${article.category?.name || 'General'} | ${this.SITE_NAME}`;
     const description = article.seo?.metaDescription || article.excerpt || 
-      `${article.title} | Latest ${article.category.name.toLowerCase()} news from ${this.SITE_NAME}`;
+      `${article.title} | Latest ${article.category?.name?.toLowerCase() || 'general'} news from ${this.SITE_NAME}`;
 
     const keywords = [
       'Dominica News',
       'Breaking News',
-      article.category.name,
+      article.category?.name || 'General',
       ...article.tags,
       ...(article.seo?.keywords || [])
     ];
@@ -112,7 +112,7 @@ export class MetaTagsService {
       articlePublishedTime: new Date(article.publishedAt || article.createdAt).toISOString(),
       articleModifiedTime: new Date(article.updatedAt).toISOString(),
       articleAuthor: article.author.name,
-      articleSection: article.category.name,
+      articleSection: article.category?.name || 'General',
       articleTags: article.tags,
       
       // News-specific tags
